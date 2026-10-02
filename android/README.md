@@ -16,14 +16,26 @@ Lokale Dateien werden als komprimierte `.jsonl.gz` geschrieben.
 - `position_available=false`
 - `velocity_available=true`, sobald Android Location-Speed liefert
 - lokale JSONL-Aufzeichnung unter dem app-eigenen Dateipfad
-- Log-Profile:
-  - `Balanced`: Reference State 10 Hz, IMU 25 Hz, Location 1 Hz
-  - `State + Location`: Reference State 5 Hz, keine Raw-IMU, Location 1 Hz
-  - `Full Debug`: Reference State 20 Hz, IMU 50 Hz, Location 2 Hz
 
 Android liefert ohne ARCore/visuelle Odometrie keine lokale 3D-Position wie ARKit.
 Fuer den ersten Geraetetest ist diese App deshalb fuer Orientierung, GNSS-Speed,
 UDP, Zeitstempel, Roh-IMU und Logger-Integration gedacht.
+
+## Log-Profile
+
+Die Log-Profile bestimmen, wie dicht die App lokal speichert und live per UDP
+sendet:
+
+- `Balanced`: Standardprofil fuer normale Feldtests. Es schreibt
+  `REFERENCE_STATE` mit ca. 10 Hz, `RAW_SENSOR`/IMU mit ca. 25 Hz und Location
+  mit ca. 1 Hz. Das ist der beste Kompromiss aus Dateigroesse und Analysewert.
+- `State + Location`: kleineres Profil fuer lange Wege oder reine
+  GPS-/Geschwindigkeitspruefung. Es schreibt `REFERENCE_STATE` mit ca. 5 Hz und
+  Location mit ca. 1 Hz, aber keine Raw-IMU. Dadurch fehlen Gyro-/Accel-Details
+  fuer Synchronisation und Debugging.
+- `Full Debug`: Detailprofil fuer kurze Tests. Es schreibt `REFERENCE_STATE`
+  mit ca. 20 Hz, `RAW_SENSOR`/IMU mit ca. 50 Hz und Location mit ca. 2 Hz. Dieses
+  Profil erzeugt die groessten Dateien.
 
 ## Start
 

@@ -85,6 +85,38 @@ lokaler Log-Dateipfad
 Hinweis: Die Android-Beschleunigung enthaelt aktuell auch Gravitation. Im
 Stillstand ist der Betrag deshalb typischerweise nahe `9.81 m/s2`.
 
+## Android Log-Profile
+
+Die App bietet mehrere Log-Profile. Sie bestimmen, wie viele Nachrichten lokal
+gespeichert und live per UDP gesendet werden.
+
+```text
+Balanced
+  Standardprofil fuer normale Feldtests.
+  Schreibt REFERENCE_STATE mit ca. 10 Hz und RAW_SENSOR/IMU mit ca. 25 Hz.
+  Location/GPS wird mit ca. 1 Hz aktualisiert, sobald Android neue Werte liefert.
+  Dieses Profil ist der beste Kompromiss aus Dateigroesse und spaeterer Analyse.
+
+State + Location
+  Kleineres Log fuer lange Wege oder reine GPS-/Geschwindigkeitspruefung.
+  Schreibt REFERENCE_STATE mit ca. 5 Hz und Location/GPS mit ca. 1 Hz.
+  RAW_SENSOR/IMU wird nicht gespeichert.
+  Dadurch sind die Dateien deutlich kleiner, aber Gyro-/Accel-Details fuer
+  Synchronisation und Debugging fehlen.
+
+Full Debug
+  Detailprofil fuer kurze Tests.
+  Schreibt REFERENCE_STATE mit ca. 20 Hz, RAW_SENSOR/IMU mit ca. 50 Hz und
+  Location/GPS mit ca. 2 Hz.
+  Dieses Profil erzeugt die groessten Dateien und ist vor allem zum Debuggen
+  von Sensorverhalten, Paketfluss und Zeitstempeln gedacht.
+```
+
+Fuer normale Tests zuerst `Balanced` verwenden. `State + Location` ist sinnvoll,
+wenn die Aufzeichnung lange laufen soll und primaer Ort, Hoehe und Geschwindigkeit
+interessieren. `Full Debug` nur verwenden, wenn wirklich mehr Sensordetails
+gebraucht werden.
+
 ## Wo die Dateien liegen
 
 Live-UDP auf dem Laptop:
