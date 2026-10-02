@@ -46,6 +46,25 @@ Die praktische Schritt-fuer-Schritt-Anleitung fuer Feldtests steht in
 Das Zielbild fuer groessere Flugdistanz mit Langstreckenfunk und Bodenstation
 steht in `docs/long-range-telemetry-goal.md`.
 
+## Android Log-Profile
+
+Die Android-App bietet drei Profile fuer Aufzeichnung und Live-UDP:
+
+- `Balanced`: Standardprofil fuer normale Feldtests. Es schreibt
+  `REFERENCE_STATE` mit ca. 10 Hz, `RAW_SENSOR`/IMU mit ca. 25 Hz und Location
+  mit ca. 1 Hz. Das ist der beste Kompromiss aus Dateigroesse und spaeterer
+  Analyse.
+- `State + Location`: kleineres Profil fuer lange Wege oder reine
+  GPS-/Geschwindigkeitspruefung. Es schreibt `REFERENCE_STATE` mit ca. 5 Hz und
+  Location mit ca. 1 Hz, aber keine Raw-IMU. Dadurch fehlen Gyro-/Accel-Details
+  fuer Synchronisation und Debugging.
+- `Full Debug`: Detailprofil fuer kurze Tests. Es schreibt `REFERENCE_STATE`
+  mit ca. 20 Hz, `RAW_SENSOR`/IMU mit ca. 50 Hz und Location mit ca. 2 Hz. Dieses
+  Profil erzeugt die groessten Dateien.
+
+Fuer normale Android-Tests zuerst `Balanced` verwenden. Fuer lange
+GPS-/Geschwindigkeitsaufzeichnungen ist `State + Location` sparsamer.
+
 ## MVP-Datenfluss
 
 ```text
