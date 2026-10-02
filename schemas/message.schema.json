@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local/eskf-reference-lab/message.schema.json",
+  "title": "ESKF Reference Lab Message",
+  "type": "object",
+  "required": ["schema_version", "message_type", "source", "device_time_s", "payload"],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "message_type": {
+      "type": "string",
+      "enum": [
+        "REFERENCE_STATE",
+        "ESTIMATOR_STATE",
+        "TELEMETRY_SUMMARY",
+        "RAW_SENSOR",
+        "FILTER_DIAGNOSTIC",
+        "CLOCK_SYNC"
+      ]
+    },
+    "source": {
+      "type": "string",
+      "enum": ["IPHONE", "ANDROID", "WEB", "ARDUINO", "PC"]
+    },
+    "device_time_s": {
+      "type": "number",
+      "description": "Monotonic device-local timestamp in seconds."
+    },
+    "pc_recv_time_s": {
+      "type": "number",
+      "description": "PC monotonic receive timestamp in seconds, added by the logger."
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "transport": {
+      "type": "string",
+      "enum": ["udp", "serial", "file", "synthetic"]
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "position_m": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "type": "number" }
+        },
+        "velocity_mps": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "type": "number" }
+        },
+        "quaternion_wxyz": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": { "type": "number" }
+        },
+        "accel_mps2": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "type": "number" }
+        },
+        "gyro_radps": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "type": "number" }
+        },
+        "latitude_deg": {
+          "type": "number"
+        },
+        "longitude_deg": {
+          "type": "number"
+        },
+        "altitude_m": {
+          "type": "number"
+        },
+        "speed_mps": {
+          "type": "number"
+        },
+        "climb_mps": {
+          "type": "number"
+        },
+        "course_deg": {
+          "type": "number"
+        },
+        "battery_v": {
+          "type": "number"
+        },
+        "link_rssi_dbm": {
+          "type": "number"
+        },
+        "flight_state": {
+          "type": "string"
+        },
+        "tracking_state": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

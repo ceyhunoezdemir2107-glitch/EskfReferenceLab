@@ -1,0 +1,4 @@
+{"schema_version":"1.0","message_type":"REFERENCE_STATE","source":"IPHONE","device_time_s":0.00,"sequence":0,"payload":{"state_source":"ARKit","position_m":[0.0,0.0,0.0],"velocity_mps":[0.0,0.0,0.0],"quaternion_wxyz":[1.0,0.0,0.0,0.0],"tracking_state":"normal"}}
+{"schema_version":"1.0","message_type":"ESTIMATOR_STATE","source":"ARDUINO","device_time_s":0.00,"sequence":0,"payload":{"position_m":[0.01,0.0,0.0],"velocity_mps":[0.0,0.0,0.0],"quaternion_wxyz":[1.0,0.0,0.0,0.0],"accel_bias_mps2":[0.0,0.0,0.0],"gyro_bias_radps":[0.0,0.0,0.0]}}
+{"schema_version":"1.0","message_type":"RAW_SENSOR","source":"IPHONE","device_time_s":0.00,"sequence":1,"payload":{"gyro_radps":[0.0,0.0,0.0]}}
+{"schema_version":"1.0","message_type":"RAW_SENSOR","source":"ARDUINO","device_time_s":0.00,"sequence":1,"payload":{"gyro_radps":[0.0,0.0,0.0]}}

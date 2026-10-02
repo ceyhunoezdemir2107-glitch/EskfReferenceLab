@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ESKF Reference Lab</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="panel hero">
+        <div>
+          <p class="eyebrow">Web Test Harness</p>
+          <h1>ESKF Reference Lab</h1>
+          <p class="subline">Browserbasierter Reference-State- und Rohsensor-Test fuer den Python-Logger.</p>
+        </div>
+        <div class="status-pill" id="statusPill">stopped</div>
+      </section>
+
+      <section class="grid">
+        <div class="panel controls">
+          <h2>Stream</h2>
+          <label>
+            Endpoint
+            <input id="endpointInput" value="/api/message" spellcheck="false">
+          </label>
+          <label>
+            Rate
+            <select id="rateInput">
+              <option value="20">20 Hz</option>
+              <option value="30" selected>30 Hz</option>
+              <option value="60">60 Hz</option>
+            </select>
+          </label>
+          <label class="check">
+            <input id="sensorToggle" type="checkbox" checked>
+            DeviceOrientation verwenden
+          </label>
+          <div class="button-row">
+            <button id="permissionButton" type="button">Sensorfreigabe</button>
+            <button id="startButton" type="button">Start</button>
+            <button id="stopButton" type="button" disabled>Stop</button>
+          </div>
+        </div>
+
+        <div class="panel readout">
+          <h2>Live</h2>
+          <dl>
+            <div><dt>Sequence</dt><dd id="sequenceValue">0</dd></div>
+            <div><dt>Quelle</dt><dd id="sourceValue">WEB</dd></div>
+            <div><dt>Modus</dt><dd id="modeValue">simulated</dd></div>
+            <div><dt>Quaternion</dt><dd id="quatValue">[1, 0, 0, 0]</dd></div>
+            <div><dt>Gyro</dt><dd id="gyroValue">[0, 0, 0]</dd></div>
+          </dl>
+        </div>
+      </section>
+
+      <section class="panel log">
+        <h2>Server</h2>
+        <pre id="eventLog">Bereit.</pre>
+      </section>
+    </main>
+    <script src="./app.js"></script>
+  </body>
+</html>
