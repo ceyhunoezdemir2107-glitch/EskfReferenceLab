@@ -49,6 +49,37 @@ Die praktische Schritt-fuer-Schritt-Anleitung fuer Feldtests steht in
 Das Zielbild fuer groessere Flugdistanz mit Langstreckenfunk und Bodenstation
 steht in `docs/long-range-telemetry-goal.md`.
 
+## Orientierung und Winkel
+
+Die Orientierung wird im gesamten Projekt primaer als Quaternion gespeichert:
+
+```json
+"quaternion_wxyz": [w, x, y, z]
+```
+
+Fuer Live-Anzeige und schnelle Plausibilitaetspruefung wird zusaetzlich ein
+Hilfsfeld mit Roll, Pitch und Yaw in Grad verwendet:
+
+```json
+"euler_deg_rpy": [roll_deg, pitch_deg, yaw_deg]
+```
+
+Aktueller Stand:
+
+- Android zeigt Quaternion und Roll/Pitch/Yaw live in der App und speichert beide
+  Felder im `REFERENCE_STATE`.
+- Arduino/ESP32 sendet `quaternion_wxyz` und `euler_deg_rpy` im
+  `ESTIMATOR_STATE`; `TELEMETRY_SUMMARY` enthaelt die kompakten Winkel fuer
+  Live-Monitoring ueber Funk/Bodenstation.
+- iOS Swift/ARKit berechnet die Winkel aus der ARKit-Quaternion, zeigt sie an
+  und sendet sie im `REFERENCE_STATE`.
+- Web-Testoberflaeche zeigt Quaternion und Winkel an und sendet beide Felder.
+- Flutter ist als Quellvorlage fuer iOS/Web vorbereitet und erzeugt dasselbe
+  Payload-Format.
+
+Wichtig: Fuer den eigentlichen State-vs-State-Vergleich bleibt
+`quaternion_wxyz` massgeblich. `euler_deg_rpy` ist ein abgeleitetes Komfortfeld.
+
 ## Android Log-Profile
 
 Die Android-App bietet drei Profile fuer Aufzeichnung und Live-UDP:
