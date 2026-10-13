@@ -17,6 +17,12 @@ android/local.properties
 android/**/build/
 *.iml
 
+# Flutter / Dart generated files
+flutter/**/.dart_tool/
+flutter/**/build/
+flutter/**/.packages
+flutter/**/pubspec.lock
+
 # Local editor and OS files
 .idea/
 .vscode/

@@ -13,6 +13,7 @@
 #include <SPI.h>
 #include <WiFi.h>
 #include <WiFiUdp.h>
+#include <math.h>
 
 // Local blackbox logging. Prefer SD for flight tests. Switch to LittleFS for
 // short bench tests without an SD card.
@@ -77,6 +78,7 @@ struct TelemetrySummary {
   float speedMps;
   float climbMps;
   float courseDeg;
+  float eulerDegRpy[3];
   float batteryV;
   int linkRssiDbm;
   const char* flightState;
@@ -84,6 +86,35 @@ struct TelemetrySummary {
 
 static float deviceTimeS() {
   return millis() * 0.001f;
+}
+
+static void quatToEulerDegRpy(const float qIn[4], float eulerDegRpy[3]) {
+  float w = qIn[0];
+  float x = qIn[1];
+  float y = qIn[2];
+  float z = qIn[3];
+  const float norm = sqrtf(w * w + x * x + y * y + z * z);
+  if (norm > 0.0f) {
+    w /= norm;
+    x /= norm;
+    y /= norm;
+    z /= norm;
+  }
+
+  const float roll = atan2f(
+    2.0f * (w * x + y * z),
+    1.0f - 2.0f * (x * x + y * y)
+  );
+  const float pitchArg = fmaxf(-1.0f, fminf(1.0f, 2.0f * (w * y - z * x)));
+  const float pitch = asinf(pitchArg);
+  const float yaw = atan2f(
+    2.0f * (w * z + x * y),
+    1.0f - 2.0f * (y * y + z * z)
+  );
+
+  eulerDegRpy[0] = roll * 57.2957795f;
+  eulerDegRpy[1] = pitch * 57.2957795f;
+  eulerDegRpy[2] = yaw * 57.2957795f;
 }
 
 static void sendPacket(const char* json) {
@@ -290,10 +321,11 @@ static void readEskfState(EskfState& state) {
   state.v[0] = 0.1f * cosf(0.2f * t);
   state.v[1] = -0.1f * sinf(0.2f * t);
   state.v[2] = 0.0f;
-  state.q[0] = 1.0f;
+  const float yawRad = 0.25f * sinf(0.4f * t);
+  state.q[0] = cosf(0.5f * yawRad);
   state.q[1] = 0.0f;
   state.q[2] = 0.0f;
-  state.q[3] = 0.0f;
+  state.q[3] = sinf(0.5f * yawRad);
   state.ba[0] = 0.0f;
   state.ba[1] = 0.0f;
   state.ba[2] = 0.0f;
@@ -322,6 +354,9 @@ static void readTelemetrySummary(TelemetrySummary& telemetry) {
   telemetry.speedMps = 0.0f;
   telemetry.climbMps = 0.0f;
   telemetry.courseDeg = 0.0f;
+  telemetry.eulerDegRpy[0] = 0.0f;
+  telemetry.eulerDegRpy[1] = 0.0f;
+  telemetry.eulerDegRpy[2] = 14.3f * sinf(0.4f * t);
   telemetry.batteryV = 11.7f;
   telemetry.linkRssiDbm = WiFi.status() == WL_CONNECTED ? static_cast<int>(WiFi.RSSI()) : -127;
   telemetry.flightState = "bench";
@@ -336,6 +371,7 @@ static void sendTelemetrySummary(const TelemetrySummary& telemetry) {
     "\"device_time_s\":%.6f,\"sequence\":%lu,"
     "\"payload\":{\"latitude_deg\":%.7f,\"longitude_deg\":%.7f,\"altitude_m\":%.2f,"
     "\"speed_mps\":%.2f,\"climb_mps\":%.2f,\"course_deg\":%.1f,"
+    "\"euler_deg_rpy\":[%.2f,%.2f,%.2f],"
     "\"battery_v\":%.2f,\"link_rssi_dbm\":%d,\"flight_state\":\"%s\"}}",
     deviceTimeS(),
     static_cast<unsigned long>(sequenceNumber++),
@@ -345,6 +381,9 @@ static void sendTelemetrySummary(const TelemetrySummary& telemetry) {
     telemetry.speedMps,
     telemetry.climbMps,
     telemetry.courseDeg,
+    telemetry.eulerDegRpy[0],
+    telemetry.eulerDegRpy[1],
+    telemetry.eulerDegRpy[2],
     telemetry.batteryV,
     telemetry.linkRssiDbm,
     telemetry.flightState
@@ -353,7 +392,10 @@ static void sendTelemetrySummary(const TelemetrySummary& telemetry) {
 }
 
 static void sendEstimatorState(const EskfState& state) {
-  char json[768];
+  float eulerDegRpy[3];
+  quatToEulerDegRpy(state.q, eulerDegRpy);
+
+  char json[896];
   snprintf(
     json,
     sizeof(json),
@@ -361,12 +403,14 @@ static void sendEstimatorState(const EskfState& state) {
     "\"device_time_s\":%.6f,\"sequence\":%lu,"
     "\"payload\":{\"position_m\":[%.6f,%.6f,%.6f],\"velocity_mps\":[%.6f,%.6f,%.6f],"
     "\"quaternion_wxyz\":[%.8f,%.8f,%.8f,%.8f],"
+    "\"euler_deg_rpy\":[%.2f,%.2f,%.2f],"
     "\"accel_bias_mps2\":[%.6f,%.6f,%.6f],\"gyro_bias_radps\":[%.8f,%.8f,%.8f]}}",
     deviceTimeS(),
     static_cast<unsigned long>(sequenceNumber++),
     state.p[0], state.p[1], state.p[2],
     state.v[0], state.v[1], state.v[2],
     state.q[0], state.q[1], state.q[2], state.q[3],
+    eulerDegRpy[0], eulerDegRpy[1], eulerDegRpy[2],
     state.ba[0], state.ba[1], state.ba[2],
     state.bg[0], state.bg[1], state.bg[2]
   );

@@ -8,6 +8,7 @@ const statusPill = document.querySelector("#statusPill");
 const sequenceValue = document.querySelector("#sequenceValue");
 const modeValue = document.querySelector("#modeValue");
 const quatValue = document.querySelector("#quatValue");
+const eulerValue = document.querySelector("#eulerValue");
 const gyroValue = document.querySelector("#gyroValue");
 const eventLog = document.querySelector("#eventLog");
 
@@ -57,6 +58,28 @@ function normalizeQuat(q) {
   return q.map((v) => v / n);
 }
 
+function quatToEulerDegRpy(q) {
+  const [w0, x0, y0, z0] = q;
+  const n = Math.hypot(w0, x0, y0, z0) || 1;
+  const w = w0 / n;
+  const x = x0 / n;
+  const y = y0 / n;
+  const z = z0 / n;
+
+  const roll = Math.atan2(
+    2 * (w * x + y * z),
+    1 - 2 * (x * x + y * y),
+  );
+  const pitchArg = Math.max(-1, Math.min(1, 2 * (w * y - z * x)));
+  const pitch = Math.asin(pitchArg);
+  const yaw = Math.atan2(
+    2 * (w * z + x * y),
+    1 - 2 * (y * y + z * z),
+  );
+
+  return [roll, pitch, yaw].map((value) => value * 180 / Math.PI);
+}
+
 function simulatedQuat(t) {
   const yaw = 0.55 * Math.sin(t * 0.8);
   const pitch = 0.25 * Math.sin(t * 1.3);
@@ -96,6 +119,7 @@ async function sendTick() {
   const q = usingSensors
     ? eulerZxyToQuat(latestOrientation.alpha, latestOrientation.beta, latestOrientation.gamma)
     : simulatedQuat(now);
+  const eulerDegRpy = quatToEulerDegRpy(q);
   const dt = previousSample ? now - previousSample.time : 0;
   const gyro = quatDiffRate(previousSample?.q, q, dt);
 
@@ -112,6 +136,7 @@ async function sendTick() {
       position_m: [0, 0, 0],
       velocity_mps: [0, 0, 0],
       quaternion_wxyz: q,
+      euler_deg_rpy: eulerDegRpy,
       tracking_state: usingSensors ? "browser_sensor" : "simulated",
     },
   };
@@ -134,6 +159,7 @@ async function sendTick() {
   sequenceValue.textContent = String(sequence);
   modeValue.textContent = reference.payload.state_source;
   quatValue.textContent = fixedVector(q);
+  eulerValue.textContent = `Roll ${eulerDegRpy[0].toFixed(1)} deg, Pitch ${eulerDegRpy[1].toFixed(1)} deg, Yaw ${eulerDegRpy[2].toFixed(1)} deg`;
   gyroValue.textContent = fixedVector(gyro);
 }
 

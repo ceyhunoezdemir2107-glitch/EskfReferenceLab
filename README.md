@@ -34,6 +34,8 @@ Core Motion. Sie ist ein Reference State, keine perfekte Ground Truth.
 - `android`: Native Android-Test-App, die Android-Sensorfusion
   (`TYPE_ROTATION_VECTOR`), Quaternion, Roll/Pitch/Yaw-Winkel und Roh-IMU per
   UDP sendet.
+- `flutter/reference_state_client`: Flutter-Quellvorlage fuer eine spaetere
+  iOS/Web-App mit Quaternion- und Roll/Pitch/Yaw-Ausgabe.
 - `web`: Browser-Testoberflaeche fuer Reference-State/Raw-Sensor-Simulation.
 - `python`: PC-Logger und Offline-Auswertung fuer UDP + Serial.
 - `arduino`: Beispiele fuer Arduino/ESP32 JSON-Telemetrie ueber Serial,
@@ -74,6 +76,7 @@ Android RotationVector  -> REFERENCE_STATE -> UDP -> Python JSONL log
 Web Browser/Simulator   -> REFERENCE_STATE -> HTTP -> Python JSONL log
 Arduino ESKF            -> ESTIMATOR_STATE -> USB/UDP -> Python JSONL log
 Arduino/iPhone IMU      -> RAW_SENSOR      -> JSONL log, Offline-Sync
+Flutter iOS/Web Client  -> REFERENCE_STATE -> vorbereitetes Payload-Format
 ```
 
 Hinweis: Die Android-MVP-App liefert ohne ARCore nur Orientierung als

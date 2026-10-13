@@ -107,14 +107,25 @@ p_est, v_est, q_est, b_a_est, b_g_est
 accel_mps2, gyro_radps
 ```
 
+`ESTIMATOR_STATE` sendet die Orientierung als:
+
+```text
+quaternion_wxyz
+euler_deg_rpy
+```
+
+`quaternion_wxyz` ist das primaere Orientierungsformat fuer den spaeteren
+State-vs-State-Vergleich. `euler_deg_rpy` ist ein daraus berechnetes Hilfsfeld
+fuer Live-Anzeige und Plausibilitaetspruefung.
+
 Fuer Langstrecken-Telemetrie zusaetzlich:
 
 ```cpp
 static void readTelemetrySummary(TelemetrySummary& telemetry)
 ```
 
-Dort werden GPS, Hoehe, Geschwindigkeit, Batterie, Linkqualitaet und Flugzustand
-eingesetzt.
+Dort werden GPS, Hoehe, Geschwindigkeit, Roll/Pitch/Yaw, Batterie,
+Linkqualitaet und Flugzustand eingesetzt.
 
 ## Bodenstation
 

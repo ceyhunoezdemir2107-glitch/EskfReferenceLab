@@ -8,6 +8,8 @@ final class ReferenceStateStreamer: NSObject, ObservableObject, ARSessionDelegat
     @Published var isRunning = false
     @Published var sequence: UInt64 = 0
     @Published var trackingState = "stopped"
+    @Published var orientationSummary = "Roll -, Pitch -, Yaw -"
+    @Published var quaternionSummary = "Quaternion wxyz: -"
     @Published var lastError = "-"
 
     private let session = ARSession()
@@ -61,9 +63,23 @@ final class ReferenceStateStreamer: NSObject, ObservableObject, ARSessionDelegat
             transform.columns.3.z
         )
         let quaternion = simd_quatf(transform)
+        let eulerDegRpy = eulerDegRpy(from: quaternion)
         let now = frame.timestamp
         velocityEstimate = estimateVelocity(time: now, position: position)
         trackingState = trackingDescription(frame.camera.trackingState)
+        orientationSummary = String(
+            format: "Roll %.1f deg, Pitch %.1f deg, Yaw %.1f deg",
+            eulerDegRpy[0],
+            eulerDegRpy[1],
+            eulerDegRpy[2]
+        )
+        quaternionSummary = String(
+            format: "Quaternion wxyz: [%.4f, %.4f, %.4f, %.4f]",
+            quaternion.real,
+            quaternion.imag.x,
+            quaternion.imag.y,
+            quaternion.imag.z
+        )
 
         let payload: [String: Any] = [
             "state_source": "ARKit",
@@ -75,9 +91,45 @@ final class ReferenceStateStreamer: NSObject, ObservableObject, ARSessionDelegat
                 Double(quaternion.imag.y),
                 Double(quaternion.imag.z)
             ],
+            "euler_deg_rpy": [
+                Double(eulerDegRpy[0]),
+                Double(eulerDegRpy[1]),
+                Double(eulerDegRpy[2])
+            ],
             "tracking_state": trackingState
         ]
         sendMessage(type: "REFERENCE_STATE", deviceTime: now, payload: payload)
+    }
+
+    private func eulerDegRpy(from quaternion: simd_quatf) -> [Double] {
+        var w = Double(quaternion.real)
+        var x = Double(quaternion.imag.x)
+        var y = Double(quaternion.imag.y)
+        var z = Double(quaternion.imag.z)
+        let norm = sqrt(w * w + x * x + y * y + z * z)
+        if norm > 0 {
+            w /= norm
+            x /= norm
+            y /= norm
+            z /= norm
+        }
+
+        let roll = atan2(
+            2.0 * (w * x + y * z),
+            1.0 - 2.0 * (x * x + y * y)
+        )
+        let pitchArg = max(-1.0, min(1.0, 2.0 * (w * y - z * x)))
+        let pitch = asin(pitchArg)
+        let yaw = atan2(
+            2.0 * (w * z + x * y),
+            1.0 - 2.0 * (y * y + z * z)
+        )
+
+        return [
+            roll * 180.0 / .pi,
+            pitch * 180.0 / .pi,
+            yaw * 180.0 / .pi
+        ]
     }
 
     private func startRawMotion() {

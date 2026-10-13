@@ -23,6 +23,13 @@ struct ContentView: View {
                     LabeledContent("Last error", value: streamer.lastError)
                 }
 
+                Section("Orientierung") {
+                    Text(streamer.orientationSummary)
+                        .font(.system(.body, design: .monospaced))
+                    Text(streamer.quaternionSummary)
+                        .font(.system(.footnote, design: .monospaced))
+                }
+
                 Button(streamer.isRunning ? "Stop" : "Start") {
                     if streamer.isRunning {
                         streamer.stop()

@@ -112,6 +112,7 @@ bleiben in der lokalen Blackbox.
     "speed_mps": 12.8,
     "climb_mps": 1.2,
     "course_deg": 84.0,
+    "euler_deg_rpy": [1.1, 3.2, 84.0],
     "battery_v": 11.7,
     "link_rssi_dbm": -82,
     "flight_state": "flying"
