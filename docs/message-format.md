@@ -41,10 +41,15 @@ Vom iPhone bereits geschaetzter/fusionierter Referenzzustand.
     "position_m": [0.12, -0.03, 1.44],
     "velocity_mps": [0.41, 0.00, -0.02],
     "quaternion_wxyz": [0.99, 0.01, 0.03, 0.02],
+    "euler_deg_rpy": [1.2, 3.4, 2.1],
     "tracking_state": "normal"
   }
 }
 ```
+
+`quaternion_wxyz` ist das primaere Orientierungsformat. `euler_deg_rpy` ist ein
+zusaetzliches Hilfsfeld fuer Anzeige und schnelle Plausibilitaetspruefung:
+Roll, Pitch, Yaw in Grad, aus dem Quaternion abgeleitet.
 
 ## ESTIMATOR_STATE
 
@@ -61,6 +66,7 @@ Arduino-State aus dem bestehenden ESKF.
     "position_m": [0.11, -0.02, 1.43],
     "velocity_mps": [0.39, 0.01, -0.03],
     "quaternion_wxyz": [0.99, 0.01, 0.03, 0.02],
+    "euler_deg_rpy": [1.1, 3.2, 2.0],
     "accel_bias_mps2": [0.01, -0.02, 0.05],
     "gyro_bias_radps": [0.001, 0.0, -0.002]
   }

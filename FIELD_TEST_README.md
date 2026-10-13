@@ -79,6 +79,8 @@ Laengengrad
 Hoehe in m
 Geschwindigkeit in m/s und km/h
 Beschleunigung x/y/z und Betrag
+Winkel Roll/Pitch/Yaw in Grad
+Quaternion w/x/y/z
 lokaler Log-Dateipfad
 ```
 

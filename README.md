@@ -32,7 +32,8 @@ Core Motion. Sie ist ein Reference State, keine perfekte Ground Truth.
 - `ios/ReferenceStateStreamer`: Swift-Startpunkt fuer eine lokale iOS-App,
   die ARKit/CoreMotion-States und optionale Rohsensoren per UDP sendet.
 - `android`: Native Android-Test-App, die Android-Sensorfusion
-  (`TYPE_ROTATION_VECTOR`) und Roh-IMU per UDP sendet.
+  (`TYPE_ROTATION_VECTOR`), Quaternion, Roll/Pitch/Yaw-Winkel und Roh-IMU per
+  UDP sendet.
 - `web`: Browser-Testoberflaeche fuer Reference-State/Raw-Sensor-Simulation.
 - `python`: PC-Logger und Offline-Auswertung fuer UDP + Serial.
 - `arduino`: Beispiele fuer Arduino/ESP32 JSON-Telemetrie ueber Serial,
@@ -76,8 +77,9 @@ Arduino/iPhone IMU      -> RAW_SENSOR      -> JSONL log, Offline-Sync
 ```
 
 Hinweis: Die Android-MVP-App liefert ohne ARCore nur Orientierung als
-Reference-State. Position und Geschwindigkeit werden als nicht verfuegbar
-markiert. Fuer vollstaendige Android-VIO waere der naechste Schritt ARCore.
+Reference-State. Die Orientierung wird als `quaternion_wxyz` gespeichert und
+in der App zusaetzlich als Roll/Pitch/Yaw-Winkel angezeigt. Fuer vollstaendige
+Android-VIO waere der naechste Schritt ARCore.
 
 ## Web-Test starten
 

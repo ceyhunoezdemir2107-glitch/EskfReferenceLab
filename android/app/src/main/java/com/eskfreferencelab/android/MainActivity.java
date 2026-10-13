@@ -33,6 +33,7 @@ public class MainActivity extends Activity {
     private Spinner profileInput;
     private TextView statusText;
     private TextView sequenceText;
+    private TextView orientationText;
     private TextView locationText;
     private TextView positionText;
     private TextView altitudeText;
@@ -50,6 +51,10 @@ public class MainActivity extends Activity {
             setControls(running);
             updateStatus(intent.getStringExtra(RecordingService.EXTRA_STATUS));
             sequenceText.setText("Sequence: " + intent.getLongExtra(RecordingService.EXTRA_SEQUENCE, 0));
+            String orientation = intent.getStringExtra(RecordingService.EXTRA_ORIENTATION_DETAILS);
+            if (orientation != null) {
+                orientationText.setText(orientation);
+            }
             String location = intent.getStringExtra(RecordingService.EXTRA_LOCATION);
             if (location != null) {
                 locationText.setText("Location summary: " + location);
@@ -178,6 +183,8 @@ public class MainActivity extends Activity {
 
         statusText = valueText(root, "Status");
         sequenceText = valueText(root, "Sequence");
+        orientationText = valueText(root, "Orientierung");
+        orientationText.setText("Winkel: Roll -, Pitch -, Yaw -\nQuaternion wxyz: -");
         locationText = valueText(root, "Location summary");
         locationText.setText("Location summary: no fix");
         positionText = valueText(root, "Position");

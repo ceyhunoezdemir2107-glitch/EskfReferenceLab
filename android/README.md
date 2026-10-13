@@ -10,6 +10,7 @@ Lokale Dateien werden als komprimierte `.jsonl.gz` geschrieben.
 
 - `REFERENCE_STATE` mit Orientierung aus `TYPE_ROTATION_VECTOR`
 - Fallback auf `TYPE_GAME_ROTATION_VECTOR`
+- Live-Anzeige von Quaternion und Roll/Pitch/Yaw-Winkeln
 - GNSS/Network-Location mit `speed_mps`
 - `velocity_mps` aus Android-Speed und Bearing, falls verfuegbar
 - `RAW_SENSOR` mit Accelerometer und Gyroscope

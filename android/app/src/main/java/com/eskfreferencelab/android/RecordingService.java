@@ -57,6 +57,7 @@ public class RecordingService extends Service implements SensorEventListener, Lo
     public static final String EXTRA_RUNNING = "running";
     public static final String EXTRA_STATUS = "status";
     public static final String EXTRA_SEQUENCE = "sequence";
+    public static final String EXTRA_ORIENTATION_DETAILS = "orientation_details";
     public static final String EXTRA_LOCATION = "location";
     public static final String EXTRA_POSITION_DETAILS = "position_details";
     public static final String EXTRA_ALTITUDE_DETAILS = "altitude_details";
@@ -85,6 +86,7 @@ public class RecordingService extends Service implements SensorEventListener, Lo
     private volatile boolean recording = false;
     private volatile Location latestLocation;
     private volatile String status = "stopped";
+    private volatile String orientationDetails = "Winkel: Roll -, Pitch -, Yaw -\nQuaternion wxyz: -";
     private volatile String locationSummary = "no fix";
     private volatile String positionDetails = "Breitengrad/Laengengrad: -";
     private volatile String altitudeDetails = "Hoehe: -";
@@ -356,6 +358,9 @@ public class RecordingService extends Service implements SensorEventListener, Lo
     private void sendReferenceState(SensorEvent event, double deviceTimeS) throws JSONException {
         float[] q = new float[4];
         SensorManager.getQuaternionFromVector(q, event.values);
+        double[] eulerDegRpy = eulerDegRpyFromQuaternion(q);
+        updateOrientationSummary(q, eulerDegRpy);
+        broadcastStatusIfDue(deviceTimeS);
         Location location = latestLocation;
         boolean hasSpeed = location != null && location.hasSpeed();
 
@@ -368,6 +373,7 @@ public class RecordingService extends Service implements SensorEventListener, Lo
         payload.put("position_m", vector(0.0, 0.0, 0.0));
         payload.put("velocity_mps", velocityFromLocation(location));
         payload.put("quaternion_wxyz", vector(q[0], q[1], q[2], q[3]));
+        payload.put("euler_deg_rpy", vector(eulerDegRpy[0], eulerDegRpy[1], eulerDegRpy[2]));
         payload.put("tracking_state", accuracyText(event.accuracy));
         putLocationFields(payload, location);
         sendMessage("REFERENCE_STATE", deviceTimeS, payload);
@@ -429,6 +435,36 @@ public class RecordingService extends Service implements SensorEventListener, Lo
         double east = speed * Math.sin(bearingRad);
         double north = speed * Math.cos(bearingRad);
         return vector(east, north, 0.0);
+    }
+
+    private double[] eulerDegRpyFromQuaternion(float[] q) {
+        double w = q[0];
+        double x = q[1];
+        double y = q[2];
+        double z = q[3];
+        double norm = Math.sqrt(w * w + x * x + y * y + z * z);
+        if (norm > 0.0) {
+            w /= norm;
+            x /= norm;
+            y /= norm;
+            z /= norm;
+        }
+
+        double roll = Math.atan2(
+                2.0 * (w * x + y * z),
+                1.0 - 2.0 * (x * x + y * y)
+        );
+        double pitchArg = 2.0 * (w * y - z * x);
+        double pitch = Math.asin(Math.max(-1.0, Math.min(1.0, pitchArg)));
+        double yaw = Math.atan2(
+                2.0 * (w * z + x * y),
+                1.0 - 2.0 * (y * y + z * z)
+        );
+        return new double[] {
+                Math.toDegrees(roll),
+                Math.toDegrees(pitch),
+                Math.toDegrees(yaw)
+        };
     }
 
     private void putLocationFields(JSONObject payload, Location location) throws JSONException {
@@ -667,6 +703,20 @@ public class RecordingService extends Service implements SensorEventListener, Lo
         );
     }
 
+    private void updateOrientationSummary(float[] q, double[] eulerDegRpy) {
+        orientationDetails = String.format(
+                Locale.US,
+                "Winkel: Roll %.1f deg, Pitch %.1f deg, Yaw %.1f deg\nQuaternion wxyz: [%.4f, %.4f, %.4f, %.4f]",
+                eulerDegRpy[0],
+                eulerDegRpy[1],
+                eulerDegRpy[2],
+                q[0],
+                q[1],
+                q[2],
+                q[3]
+        );
+    }
+
     private void broadcastStatusIfDue(double deviceTimeS) {
         if (lastUiBroadcastS >= 0.0 && deviceTimeS - lastUiBroadcastS < 0.50) {
             return;
@@ -680,6 +730,7 @@ public class RecordingService extends Service implements SensorEventListener, Lo
         intent.putExtra(EXTRA_RUNNING, recording);
         intent.putExtra(EXTRA_STATUS, status);
         intent.putExtra(EXTRA_SEQUENCE, sequence.get());
+        intent.putExtra(EXTRA_ORIENTATION_DETAILS, orientationDetails);
         intent.putExtra(EXTRA_LOCATION, locationSummary);
         intent.putExtra(EXTRA_POSITION_DETAILS, positionDetails);
         intent.putExtra(EXTRA_ALTITUDE_DETAILS, altitudeDetails);

@@ -63,6 +63,13 @@
           "maxItems": 4,
           "items": { "type": "number" }
         },
+        "euler_deg_rpy": {
+          "type": "array",
+          "description": "Human-readable helper angles derived from quaternion_wxyz: roll, pitch, yaw in degrees.",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "type": "number" }
+        },
         "accel_mps2": {
           "type": "array",
           "minItems": 3,
